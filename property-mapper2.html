@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>REINS MAPPER</title>
+        <style>
+            body {
+                font-family: "Helvetica Neue", Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f5f7fa;
+            }
+            h1 {
+                color: #2c3e50;
+                text-align: center;
+                margin-bottom: 30px;
+            }
+            .container {
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                gap: 20px;
+            }
+            .input-section,
+            .result-section {
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            textarea {
+                width: 100%;
+                height: 400px;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 14px;
+                resize: vertical;
+                margin-bottom: 15px;
+            }
+            button {
+                padding: 10px 15px;
+                background-color: #3498db;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-right: 10px;
+            }
+            button:hover {
+                background-color: #2980b9;
+            }
+            #map {
+                height: 500px;
+                width: 100%;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+            #addressList {
+                height: 200px;
+                overflow-y: auto;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                padding: 10px;
+                margin-bottom: 10px;
+                font-size: 14px;
+            }
+            .stats {
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+            .address-item {
+                padding: 5px;
+                margin-bottom: 5px;
+                border-bottom: 1px solid #eee;
+                cursor: pointer;
+            }
+            .address-item:hover {
+                background-color: #f0f0f0;
+            }
+            .address-item.valid {
+                color: #27ae60;
+            }
+            .address-item.invalid {
+                color: #e74c3c;
+                text-decoration: line-through;
+            }
+            .prefecture-select {
+                margin-bottom: 15px;
+                padding: 8px;
+                border-radius: 4px;
+                border: 1px solid #ddd;
+                width: 100%;
+            }
+            .options {
+                margin-bottom: 15px;
+            }
+            .checkbox-container {
+                margin-bottom: 10px;
+            }
+            #errorMessage {
+                color: #e74c3c;
+                margin-top: 10px;
+            }
+            footer {
+                margin-top: 40px;
+                padding-top: 20px;
+                border-top: 1px solid #eee;
+                font-size: 14px;
+                color: #666;
+            }
+            .footer-content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            .footer-section h3 {
+                margin-bottom: 10px;
+                color: #333;
+            }
+            .copyright {
+                margin-top: 20px;
+                text-align: center;
+                font-size: 12px;
+            }
+            @media (max-width: 768px) {
+                .container {
+                    grid-template-columns: 1fr;
+                }
+                .footer-content {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <h1>REINS MAPPER</h1>
+
+        <div class="container">
+            <div class="input-section">
+                <h2>テキスト入力</h2>
+
+                <div class="options">
+                    <label for="prefectureSelect">抽出する都道府県:</label>
+                    <select id="prefectureSelect" class="prefecture-select">
+                        <option value="北海道">北海道</option>
+                        <option value="青森県">青森県</option>
+                        <option value="岩手県">岩手県</option>
+                        <option value="宮城県">宮城県</option>
+                        <option value="秋田県">秋田県</option>
+                        <option value="山形県">山形県</option>
+                        <option value="福島県">福島県</option>
+                        <option value="茨城県">茨城県</option>
+                        <option value="栃木県">栃木県</option>
+                        <option value="群馬県">群馬県</option>
+                        <option value="埼玉県">埼玉県</option>
+                        <option value="千葉県">千葉県</option>
+                        <option value="東京都" selected>東京都</option>
+                        <option value="神奈川県">神奈川県</option>
+                        <option value="新潟県">新潟県</option>
+                        <option value="富山県">富山県</option>
+                        <option value="石川県">石川県</option>
+                        <option value="福井県">福井県</option>
+                        <option value="山梨県">山梨県</option>
+                        <option value="長野県">長野県</option>
+                        <option value="岐阜県">岐阜県</option>
+                        <option value="静岡県">静岡県</option>
+                        <option value="愛知県">愛知県</option>
+                        <option value="三重県">三重県</option>
+                        <option value="滋賀県">滋賀県</option>
+                        <option value="京都府">京都府</option>
+                        <option value="大阪府">大阪府</option>
+                        <option value="兵庫県">兵庫県</option>
+                        <option value="奈良県">奈良県</option>
+                        <option value="和歌山県">和歌山県</option>
+                        <option value="鳥取県">鳥取県</option>
+                        <option value="島根県">島根県</option>
+                        <option value="岡山県">岡山県</option>
+                        <option value="広島県">広島県</option>
+                        <option value="山口県">山口県</option>
+                        <option value="徳島県">徳島県</option>
+                        <option value="香川県">香川県</option>
+                        <option value="愛媛県">愛媛県</option>
+                        <option value="高知県">高知県</option>
+                        <option value="福岡県">福岡県</option>
+                        <option value="佐賀県">佐賀県</option>
+                        <option value="長崎県">長崎県</option>
+                        <option value="熊本県">熊本県</option>
+                        <option value="大分県">大分県</option>
+                        <option value="宮崎県">宮崎県</option>
+                        <option value="鹿児島県">鹿児島県</option>
+                        <option value="沖縄県">沖縄県</option>
+                    </select>
+                </div>
+
+                <div class="checkbox-container">
+                    <input type="checkbox" id="anyPrefecture" />
+                    <label for="anyPrefecture"
+                        >全ての都道府県から抽出する</label
+                    >
+                </div>
+
+                <textarea
+                    id="inputText"
+                    placeholder="REINSの検索結果ページをここに貼り付けてください..."
+                ></textarea>
+
+                <button id="extractButton">住所を抽出して地図に表示</button>
+                <button id="clearButton">クリア</button>
+
+                <div id="errorMessage"></div>
+            </div>
+
+            <div class="result-section">
+                <h2>地図</h2>
+                <div id="map"></div>
+
+                <div class="stats">
+                    <span id="totalAddresses">抽出された住所: 0</span> |
+                    <span id="validAddresses">有効な住所: 0</span> |
+                    <span id="invalidAddresses">無効な住所: 0</span>
+                </div>
+
+                <h3>抽出された住所</h3>
+                <div id="addressList"></div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>使い方</h3>
+                    <p>
+                        REINS
+                        MAPPERは、REINSの検索結果ページ全体をコピー＆ペーストするだけで、物件の所在地を地図上に一括表示できるツールです。
+                    </p>
+                    <ol>
+                        <li>REINSで検索した結果画面を全てコピーします</li>
+                        <li>コピーした内容を入力欄にペーストします</li>
+                        <li>
+                            「住所を抽出して地図に表示」ボタンをクリックします
+                        </li>
+                        <li>
+                            抽出された住所が地図上にマーカーとして表示されます
+                        </li>
+                        <li>
+                            住所リストの項目をクリックすると、対応するマーカーが地図上で強調表示されます
+                        </li>
+                    </ol>
+                    <p>
+                        <strong>注意：</strong
+                        >これはβ版です。不具合等ございましたら、下記の開発者までご連絡ください。
+                    </p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>開発者情報・お問い合わせ</h3>
+                    <p><strong>開発者:</strong> Sakamoto Masahiro</p>
+                    <p><strong>連絡先:</strong> skmt_masahiro@keio.jp</p>
+                </div>
+            </div>
+
+            <div class="copyright">
+                © 2025 REINS MAPPER | All Rights Reserved
+            </div>
+        </footer>
+
+        <script>
+            // Google Mapsのグローバル変数
+            let map;
+            let markers = [];
+            let infoWindows = [];
+            let geocoder;
+
+            // マップの初期化
+            function initMap() {
+                // 東京を中心に設定
+                const tokyo = { lat: 35.6812, lng: 139.7671 };
+
+                map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: 12,
+                    center: tokyo,
+                });
+
+                geocoder = new google.maps.Geocoder();
+            }
+
+            // DOMが読み込まれたら実行
+            document.addEventListener("DOMContentLoaded", function () {
+                // 要素の取得
+                const extractButton = document.getElementById("extractButton");
+                const clearButton = document.getElementById("clearButton");
+                const inputText = document.getElementById("inputText");
+                const prefectureSelect =
+                    document.getElementById("prefectureSelect");
+                const anyPrefectureCheckbox =
+                    document.getElementById("anyPrefecture");
+                const addressList = document.getElementById("addressList");
+                const totalAddressesElement =
+                    document.getElementById("totalAddresses");
+                const validAddressesElement =
+                    document.getElementById("validAddresses");
+                const invalidAddressesElement =
+                    document.getElementById("invalidAddresses");
+                const errorMessage = document.getElementById("errorMessage");
+
+                // 都道府県選択の切り替え
+                anyPrefectureCheckbox.addEventListener("change", function () {
+                    prefectureSelect.disabled = this.checked;
+                });
+
+                // 抽出ボタンのクリックイベント
+                extractButton.addEventListener("click", function () {
+                    // 入力チェック
+                    if (!inputText.value.trim()) {
+                        errorMessage.textContent = "テキストを入力してください";
+                        return;
+                    }
+
+                    // エラーメッセージをクリア
+                    errorMessage.textContent = "";
+
+                    // マーカーをクリア
+                    clearMarkers();
+
+                    // 住所を抽出
+                    const addresses = extractAddresses(
+                        inputText.value,
+                        anyPrefectureCheckbox.checked
+                            ? null
+                            : prefectureSelect.value
+                    );
+
+                    // 住所リストを表示
+                    displayAddressList(addresses);
+
+                    // 住所を地図に表示
+                    geocodeAddresses(addresses);
+                });
+
+                // クリアボタンのクリックイベント
+                clearButton.addEventListener("click", function () {
+                    inputText.value = "";
+                    addressList.innerHTML = "";
+                    clearMarkers();
+                    updateStats(0, 0, 0);
+                    errorMessage.textContent = "";
+                });
+            });
+
+            // 住所を抽出する関数
+            function extractAddresses(text, prefecture) {
+                // 改行で分割
+                const lines = text.split("\n");
+                const addresses = [];
+
+                // 各行をチェック
+                for (const line of lines) {
+                    // 都道府県が指定されている場合はそれで始まる行だけを抽出
+                    if (prefecture) {
+                        if (line.includes(prefecture)) {
+                            // 住所と思われる部分を抽出（建物名や部屋番号は除外）
+                            const trimmed = line.trim();
+                            if (trimmed) addresses.push(trimmed);
+                        }
+                    } else {
+                        // すべての都道府県を対象に抽出
+                        const prefectures = [
+                            "北海道",
+                            "青森県",
+                            "岩手県",
+                            "宮城県",
+                            "秋田県",
+                            "山形県",
+                            "福島県",
+                            "茨城県",
+                            "栃木県",
+                            "群馬県",
+                            "埼玉県",
+                            "千葉県",
+                            "東京都",
+                            "神奈川県",
+                            "新潟県",
+                            "富山県",
+                            "石川県",
+                            "福井県",
+                            "山梨県",
+                            "長野県",
+                            "岐阜県",
+                            "静岡県",
+                            "愛知県",
+                            "三重県",
+                            "滋賀県",
+                            "京都府",
+                            "大阪府",
+                            "兵庫県",
+                            "奈良県",
+                            "和歌山県",
+                            "鳥取県",
+                            "島根県",
+                            "岡山県",
+                            "広島県",
+                            "山口県",
+                            "徳島県",
+                            "香川県",
+                            "愛媛県",
+                            "高知県",
+                            "福岡県",
+                            "佐賀県",
+                            "長崎県",
+                            "熊本県",
+                            "大分県",
+                            "宮崎県",
+                            "鹿児島県",
+                            "沖縄県",
+                        ];
+
+                        for (const pref of prefectures) {
+                            if (line.includes(pref)) {
+                                const trimmed = line.trim();
+                                if (trimmed) addresses.push(trimmed);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // 重複を削除
+                return [...new Set(addresses)];
+            }
+
+            // 住所リストを表示する関数
+            function displayAddressList(addresses) {
+                const addressList = document.getElementById("addressList");
+                addressList.innerHTML = "";
+
+                addresses.forEach((address, index) => {
+                    const item = document.createElement("div");
+                    item.className = "address-item";
+                    item.id = `address-${index}`;
+                    item.textContent = address;
+
+                    // 住所リストの項目をクリックしたとき、対応するマーカーを中心に表示
+                    item.addEventListener("click", function () {
+                        // マーカーのインデックスを取得
+                        const markerIndex = parseInt(this.id.split("-")[1]);
+                        // マーカーが存在し、有効な住所であれば
+                        if (
+                            markers[markerIndex] &&
+                            this.classList.contains("valid")
+                        ) {
+                            // マーカーをクリックしたときと同じ動作を実行
+                            google.maps.event.trigger(
+                                markers[markerIndex],
+                                "click"
+                            );
+                            // 地図の中心をマーカーの位置に設定
+                            map.setCenter(markers[markerIndex].getPosition());
+                            // ズームレベルを少し上げる
+                            map.setZoom(16);
+                        }
+                    });
+
+                    addressList.appendChild(item);
+                });
+
+                // 統計情報を更新
+                updateStats(addresses.length, 0, 0);
+            }
+
+            // 住所をジオコーディングして地図に表示する関数
+            function geocodeAddresses(addresses) {
+                let validCount = 0;
+                let invalidCount = 0;
+                const bounds = new google.maps.LatLngBounds();
+
+                // 各住所をジオコーディング
+                addresses.forEach((address, index) => {
+                    geocoder.geocode(
+                        { address: address },
+                        function (results, status) {
+                            const addressElement = document.getElementById(
+                                `address-${index}`
+                            );
+
+                            if (status === "OK") {
+                                // 地図にマーカーを追加
+                                const marker = new google.maps.Marker({
+                                    map: map,
+                                    position: results[0].geometry.location,
+                                    title: address,
+                                    animation: google.maps.Animation.DROP,
+                                    id: index, // マーカーにIDを付与
+                                });
+
+                                // マーカーの情報ウィンドウを設定
+                                const infowindow = new google.maps.InfoWindow({
+                                    content: address,
+                                });
+
+                                // マーカーをクリックしたときの処理
+                                marker.addListener("click", function () {
+                                    // 他の情報ウィンドウをすべて閉じる
+                                    for (let iw of infoWindows) {
+                                        iw.close();
+                                    }
+                                    // このマーカーの情報ウィンドウを開く
+                                    infowindow.open(map, marker);
+                                });
+
+                                // マーカーと情報ウィンドウを配列に追加
+                                markers[index] = marker;
+                                infoWindows.push(infowindow);
+
+                                // 有効な住所としてスタイルを適用
+                                addressElement.className = "address-item valid";
+
+                                // 地図の表示範囲を更新
+                                bounds.extend(results[0].geometry.location);
+                                validCount++;
+
+                                // 有効な住所の数を更新
+                                document.getElementById(
+                                    "validAddresses"
+                                ).textContent = `有効な住所: ${validCount}`;
+
+                                // すべての有効なマーカーが追加されたら、地図の表示範囲を調整
+                                if (validCount > 0) {
+                                    map.fitBounds(bounds);
+                                    if (validCount === 1) {
+                                        map.setZoom(15);
+                                    }
+                                }
+                            } else {
+                                // ジオコーディングに失敗した場合
+                                addressElement.className =
+                                    "address-item invalid";
+                                invalidCount++;
+
+                                // 無効な住所の数を更新
+                                document.getElementById(
+                                    "invalidAddresses"
+                                ).textContent = `無効な住所: ${invalidCount}`;
+                            }
+                        }
+                    );
+                });
+            }
+
+            // マーカーをクリアする関数
+            function clearMarkers() {
+                for (let marker of markers) {
+                    if (marker) marker.setMap(null);
+                }
+                markers = [];
+
+                // 情報ウィンドウもクリア
+                for (let infoWindow of infoWindows) {
+                    infoWindow.close();
+                }
+                infoWindows = [];
+            }
+
+            // 統計情報を更新する関数
+            function updateStats(total, valid, invalid) {
+                document.getElementById(
+                    "totalAddresses"
+                ).textContent = `抽出された住所: ${total}`;
+                document.getElementById(
+                    "validAddresses"
+                ).textContent = `有効な住所: ${valid}`;
+                document.getElementById(
+                    "invalidAddresses"
+                ).textContent = `無効な住所: ${invalid}`;
+            }
+        </script>
+
+        <!-- Google Maps APIのスクリプトを読み込む -->
+        <script
+            async
+            defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAnqMOi4jXXnZjz7hDO1nE5X84LLKKu8Fw&callback=initMap"
+        ></script>
+    </body>
+</html>
